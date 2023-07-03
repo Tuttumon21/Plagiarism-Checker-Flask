@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Plagiarism Checker</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.0.2/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com%22%3E/"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@3.1.7/dist/full.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    {% include 'navbar.html' %}
+    <div class="mx-auto max-w-lg text-center mt-10">
+      <h2 class="text-3xl font-bold sm:text-4xl text-white">
+        Similarity Checker
+      </h2>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data">
+      <div style="text-align: center; margin: 20px">
+        <!-- <div class="justify-center"> -->
+        <p>Choose File 1</p>
+        <input
+          type="file"
+          name="file1"
+          accept=".pdf, .doc, .docx, .txt"
+          required
+          class="file-input file-input-bordered file-input-primary w-full max-w-xs"
+          style="
+            border-radius: 10px;
+            width: 270px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            margin: left 20px;
+          "
+        />
+        <p>Choose File 2</p>
+        <input
+          type="file"
+          name="file2"
+          accept=".pdf, .doc, .docx, .txt"
+          required
+          class="file-input file-input-bordered file-input-primary w-full max-w-xs"
+          style="
+            border-radius: 10px;
+            width: 270px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            margin: left 20px;
+          "
+        />
+        <!-- </div> -->
+      </div>
+      <div style="text-align: center">
+        <div class="justify-center mx-auto max-w-lg">
+          <button
+            type="submit"
+            class="btn btn-outline btn-info"
+            style="border-radius: 15px; height: 45px"
+          >
+            Check Plagiarism
+          </button>
+        </div>
+      </div>
+    </form>
+
+    {% if similarity_score %}
+
+    <!--
+  Heads up! 👋
+
+  This component comes with some `rtl` classes. Please remove them if they are not needed in your project.
+-->
+
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+
+    <link
+      href="https://unpkg.com/swiper/swiper-bundle.min.css"
+      rel="stylesheet"
+    />
+
+    <section class="">
+      <div
+        class="mx-auto max-w-[1340px] px-4 py-16 sm:px-6 sm:py-24 lg:me-0 lg:pe-0 lg:ps-8"
+      >
+        <div
+          class="max-w-7xl items-end justify-between sm:flex sm:pe-6 lg:pe-8"
+        >
+          <h2 class="max-w-xl text-4xl font-bold tracking-tight sm:text-5xl">
+            Result
+          </h2>
+
+          <div class="mt-8 flex gap-4 lg:mt-0">
+            <button
+              class="prev-button rounded-full border border-pink-600 p-3 text-pink-600 hover:bg-pink-600 hover:text-white"
+            >
+              <span class="sr-only">Previous Slide</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="h-5 w-5 rtl:rotate-180"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M15.75 19.5L8.25 12l7.5-7.5"
+                />
+              </svg>
+            </button>
+
+            <button
+              class="next-button rounded-full border border-pink-600 p-3 text-pink-600 hover:bg-pink-600 hover:text-white"
+            >
+              <span class="sr-only">Next Slide</span>
+              <svg
+                class="h-5 w-5 rtl:rotate-180"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M9 5l7 7-7 7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="-mx-6 mt-8 lg:col-span-2 lg:mx-0">
+          <div
+            class="swiper-container !overflow-hidden"
+            style="overflow-x: hidden"
+          >
+            <div class="swiper-wrapper">
+              <div class="swiper-slide">
+                <blockquote
+                  class="flex h-full flex-col justify-between border p-12"
+                >
+                  <div class="flex-grow">
+                    <div class="mt-4">
+                      <h3 class="text-2xl font-bold text-pink-600 sm:text-3xl">
+                        Similarity Score
+                      </h3>
+                      <p class="mt-4 text-lg font-bold text-white">
+                        {{ similarity_score }}%
+                      </p>
+                    </div>
+                  </div>
+                </blockquote>
+              </div>
+
+              <div class="swiper-slide">
+                <blockquote
+                  class="flex h-full flex-col justify-between border p-12"
+                >
+                  <div class="flex-grow">
+                    <div class="mt-4">
+                      <h3 class="text-2xl font-bold text-pink-600 sm:text-3xl">
+                        Summary 1
+                      </h3>
+                      <p class="mt-4 text-lg font-bold text-white">
+                        {{ summary1 }}
+                      </p>
+                    </div>
+                  </div>
+                </blockquote>
+              </div>
+
+              <div class="swiper-slide">
+                <blockquote
+                  class="flex h-full flex-col justify-between border p-12"
+                >
+                  <div class="flex-grow">
+                    <div class="mt-4">
+                      <h3 class="text-2xl font-bold text-pink-600 sm:text-3xl">
+                        Summary 2
+                      </h3>
+                      <p class="mt-4 text-lg font-bold text-white">
+                        {{ summary2 }}
+                      </p>
+                    </div>
+                  </div>
+                </blockquote>
+              </div>
+
+              <div class="swiper-slide">
+                <blockquote
+                  class="flex h-full flex-col justify-between border p-12"
+                >
+                  <div class="flex-grow">
+                    <div class="mt-4">
+                      <h3 class="text-2xl font-bold text-pink-600 sm:text-3xl">
+                        Text 1:
+                      </h3>
+                      <p class="mt-4 text-lg font-bold text-white">
+                        {{ text1 }}
+                      </p>
+                    </div>
+                  </div>
+                </blockquote>
+              </div>
+
+              <div class="swiper-slide">
+                <blockquote
+                  class="flex h-full flex-col justify-between border p-12"
+                >
+                  <div class="flex-grow">
+                    <div class="mt-4">
+                      <h3 class="text-2xl font-bold text-pink-600 sm:text-3xl">
+                        Text 2:
+                      </h3>
+                      <p class="mt-4 text-lg font-bold text-white">
+                        {{ text2 }}
+                      </p>
+                    </div>
+                  </div>
+                </blockquote>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script>
+      function adjustBlockquoteHeight() {
+        const blockquotes = document.querySelectorAll(
+          ".swiper-slide blockquote"
+        );
+        let maxHeight = 0;
+        blockquotes.forEach((blockquote) => {
+          const height = blockquote.offsetHeight;
+          if (height > maxHeight) {
+            maxHeight = height;
+          }
+        });
+        blockquotes.forEach((blockquote) => {
+          blockquote.style.height = `${maxHeight}px`;
+        });
+      }
+
+      // Call the adjustBlockquoteHeight function when the page finishes loading
+      window.addEventListener("load", adjustBlockquoteHeight);
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const swiper = new Swiper(".swiper-container", {
+          loop: true,
+          slidesPerView: 1,
+          spaceBetween: 32,
+          autoplay: {
+            delay: 8000,
+          },
+          navigation: {
+            nextEl: ".next-button",
+            prevEl: ".prev-button",
+          },
+          breakpoints: {
+            640: {
+              slidesPerView: 1.5,
+              centeredSlides: true,
+            },
+            1024: {
+              centeredSlides: false,
+              slidesPerView: 2.25,
+            },
+          },
+        });
+      });
+    </script>
+
+    {% endif %}
+  </body>
+</html>
