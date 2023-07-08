@@ -60,7 +60,8 @@ def create_tables():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             email TEXT NOT NULL,
-            password TEXT NOT NULL
+            password TEXT NOT NULL,
+            user_type TEXT NOT NULL
         )
     ''')
     conn.commit()
@@ -83,6 +84,7 @@ def login():
         # Perform login validation here
         email = request.form['email']
         password = request.form['password']
+        # user_type = request.form['user_type']
 
         # Check if the user exists in the database
         conn = get_db_connection()
@@ -93,8 +95,15 @@ def login():
         if user and user['password'] == password:
             # If user exists and password is correct, redirect to the dashboard
             session['email'] = email
+            user_type = user['user_type']
+            if user_type == 'Faculty':
+                return redirect(url_for('dashboard'))
+            elif user_type == 'Student':
+                return redirect(url_for('student_dashboard'))
+            else:
+                error = 'Invalid user type.'
+                return render_template('login.html', error=error)
             # name = request.args.get('name')
-            return redirect(url_for('dashboard', email=email))
         else:
             # If user does not exist or password is incorrect, show error message
             error = 'Invalid credentials. Please try again.'
@@ -113,6 +122,7 @@ def signup():
         name = request.form['name']
         email = request.form['email']
         password = request.form['password']
+        user_type = request.form['user_type']
         # Insert the user data into the database
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -128,11 +138,47 @@ def signup():
         # If login is successful, redirect to a different page
         else:
             # Insert the user data into the database
-            cursor.execute('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', (name, email, password))
+            cursor.execute('INSERT INTO users (name, email, password, user_type) VALUES (?, ?, ?, ?)',(name, email, password, user_type))
             conn.commit()
             session['email'] = email
-            return redirect(url_for('dashboard'))
+            if user_type == 'Faculty':
+                return redirect(url_for('dashboard'))
+            elif user_type == 'Student':
+                return redirect(url_for('student_dashboard'))
     return render_template('signup.html')
+
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('page_not_found.html'), 404
+
+@app.route('/studentDashboard')
+def student_dashboard():
+    if 'email' in session:
+        # email = session['email']
+        return render_template('studentDashboard.html')
+    else:
+        return redirect(url_for('home'))
+    
+@app.route('/studentDashboard', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        # No file was selected, handle the error
+        return 'No file selected', 400
+    
+    file = request.files['file']
+    
+    if file.filename == '':
+        # File name is empty, handle the error
+        return 'Empty file name', 400
+    
+    # Process the file as per your requirements
+    # For example, save the file to a specific location
+    file.save('/Flask Project Collage/uploads/uploads' + file.filename)
+    
+    # Return a success response
+    return 'File uploaded successfully', 200
+
 
 @app.route('/dashboard')
 def dashboard():
@@ -565,6 +611,89 @@ def calculate_similarity(text1, text2):
 # Function to generate summary of a text
 def generate_summary(text):
     return summarize(text)
+
+def create_tables2():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS topics (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        heading TEXT NOT NULL,
+        description TEXT NOT NULL,
+        created_by TEXT NOT NULL,
+        FOREIGN KEY (created_by) REFERENCES users(name)
+    )
+''')
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+create_tables2()
+
+@app.route('/addAssignment')
+def addAssignment():
+    if 'email' in session:
+        # email = session['email']
+        return render_template('addAssignment.html')
+    else:
+        return redirect(url_for('home'))
+
+@app.route('/addAssignment', methods=['POST'])
+def add_topic():
+    heading = request.form['heading']
+    description = request.form['description']
+    # created_by = session['name']
+    # created_by = 1  # Replace with the ID of the user who created the topic
+    email = session['email']
+    # Insert the topic into the database
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT name FROM users WHERE email = ?', (email,))
+    user = cursor.fetchone()
+    if user:
+        created_by = user['name']
+        try:
+            cursor.execute('INSERT INTO topics (heading, description, created_by) VALUES (?, ?, ?)',
+                       (heading, description, created_by))
+            conn.commit()
+            message = "Assignment successfully added."
+            status = "success"
+        except Exception as e:
+            conn.rollback()
+            message= "Error occurred while adding the assignment: " + str(e)
+            status = "error"
+
+        # return redirect(url_for('add_topic', message=message, status=status))
+        return render_template('addAssignment.html', message=message, status=status) 
+
+
+
+@app.route('/viewAssignment')
+def viewassignment():
+    if 'email' in session:
+        email = session['email']
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Retrieve the user's ID from the database
+        cursor.execute('SELECT name FROM users WHERE email = ?', (email,))
+        user = cursor.fetchone()
+        
+        if user:
+            user_name = user['name']
+
+            # Retrieve the user's assignments from the database
+            cursor.execute('SELECT * FROM topics WHERE created_by = ?', (user_name,))
+            topics = cursor.fetchall()
+            
+            return render_template('viewAssignment.html', topics=topics)
+
+    return redirect(url_for('home'))
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
