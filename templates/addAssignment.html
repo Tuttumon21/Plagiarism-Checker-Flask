@@ -1,0 +1,67 @@
+{% include 'navbar.html' %}
+<head>
+    <title>Add Assignment</title>
+</head>
+{% if status == "success" %}
+<div id="success-message" class="success-message">
+ <div class="alert alert-success mx-auto max-w-lg text-center mt-10" style="width: 400px;" >
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+        <span>{{ message }}</span>
+      </div>
+</div>
+{% elif status == "error" %}
+<div id="error-message" class="error-message">
+      <div class="alert alert-error mx-auto max-w-lg text-center mt-10" style="width: 400px;" >
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        <span>{{ message }}</span>
+      </div>
+    </div>
+      {% endif %}
+
+<div class="mx-auto max-w-lg text-center mt-10">
+
+   
+
+    <h2 class="text-3xl font-bold sm:text-4xl text-white">Add Assignment</h2>
+  </div>
+        <form method=post enctype=multipart/form-data>
+            
+
+          <div class="form-group">
+            <div class="justify-center mx-auto max-w-lg mt-5">
+                <input name="heading" type="text" placeholder="Topic Heading" class="mb-5 input input-bordered input-primary" style="width: 500px;" required/>
+              <textarea  name="description" class="textarea textarea-primary" rows="8" id="exampleFormControlTextarea1" placeholder="Topic Description..."style="width: 500px;" required></textarea>
+            </div>
+          </div>
+        <div style="text-align: center;">
+        <div class="justify-center mx-auto max-w-lg m-5">
+          
+          <button type="submit" class="btn btn-outline btn-info" style="border-radius: 15px; height: 45px;">ADD ASSIGNMENT</button>
+          
+        </div>
+    
+    </div>
+      </form>
+
+      <script>
+        // Function to remove the success or error message
+        function removeMessage() {
+          var successMessage = document.getElementById("success-message");
+          var errorMessage = document.getElementById("error-message");
+        
+          if (successMessage) {
+            successMessage.remove();
+          }
+        
+          if (errorMessage) {
+            errorMessage.remove();
+          }
+        }
+        
+        // Set a timeout to remove the message after 5 seconds
+        setTimeout(removeMessage, 5000);
+        </script>
+        
+        
