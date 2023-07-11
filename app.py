@@ -1,6 +1,8 @@
 from flask import Flask , render_template , redirect, url_for, request, session , flash
 import sqlite3
 
+from flask import send_file
+
 import time
 from requests.exceptions import HTTPError
 
@@ -10,6 +12,8 @@ retry_wait_time = 5
 from googlesearch import search
 import PyPDF2
 import os
+
+from datetime import datetime
 from werkzeug.utils import secure_filename
 
 import re
@@ -61,7 +65,8 @@ def create_tables():
             name TEXT NOT NULL,
             email TEXT NOT NULL,
             password TEXT NOT NULL,
-            user_type TEXT NOT NULL
+            user_type TEXT NOT NULL,
+            Student_course TEXT DEFAULT 'Professor'
         )
     ''')
     conn.commit()
@@ -123,6 +128,8 @@ def signup():
         email = request.form['email']
         password = request.form['password']
         user_type = request.form['user_type']
+        # Student_course = request.form['Student_course']
+        Student_course = request.form.get('Student_course', 'Faculty')
         # Insert the user data into the database
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -138,7 +145,7 @@ def signup():
         # If login is successful, redirect to a different page
         else:
             # Insert the user data into the database
-            cursor.execute('INSERT INTO users (name, email, password, user_type) VALUES (?, ?, ?, ?)',(name, email, password, user_type))
+            cursor.execute('INSERT INTO users (name, email, password, user_type, Student_course) VALUES (?, ?, ?, ?, ?)',(name, email, password, user_type, Student_course))
             conn.commit()
             session['email'] = email
             if user_type == 'Faculty':
@@ -152,32 +159,7 @@ def signup():
 def page_not_found(error):
     return render_template('page_not_found.html'), 404
 
-@app.route('/studentDashboard')
-def student_dashboard():
-    if 'email' in session:
-        # email = session['email']
-        return render_template('studentDashboard.html')
-    else:
-        return redirect(url_for('home'))
-    
-@app.route('/studentDashboard', methods=['POST'])
-def upload_file():
-    if 'file' not in request.files:
-        # No file was selected, handle the error
-        return 'No file selected', 400
-    
-    file = request.files['file']
-    
-    if file.filename == '':
-        # File name is empty, handle the error
-        return 'Empty file name', 400
-    
-    # Process the file as per your requirements
-    # For example, save the file to a specific location
-    file.save('/Flask Project Collage/uploads/uploads' + file.filename)
-    
-    # Return a success response
-    return 'File uploaded successfully', 200
+
 
 
 @app.route('/dashboard')
@@ -622,6 +604,7 @@ def create_tables2():
         heading TEXT NOT NULL,
         description TEXT NOT NULL,
         created_by TEXT NOT NULL,
+        assigned_group TEXT NOT NULL,
         FOREIGN KEY (created_by) REFERENCES users(name)
     )
 ''')
@@ -631,6 +614,7 @@ def create_tables2():
     conn.close()
 
 create_tables2()
+
 
 @app.route('/addAssignment')
 def addAssignment():
@@ -644,6 +628,7 @@ def addAssignment():
 def add_topic():
     heading = request.form['heading']
     description = request.form['description']
+    assigned_group = request.form['assigned_group']
     # created_by = session['name']
     # created_by = 1  # Replace with the ID of the user who created the topic
     email = session['email']
@@ -655,8 +640,8 @@ def add_topic():
     if user:
         created_by = user['name']
         try:
-            cursor.execute('INSERT INTO topics (heading, description, created_by) VALUES (?, ?, ?)',
-                       (heading, description, created_by))
+            cursor.execute('INSERT INTO topics (heading, description, created_by, assigned_group) VALUES (?, ?, ?, ?)',
+                       (heading, description, created_by, assigned_group))
             conn.commit()
             message = "Assignment successfully added."
             status = "success"
@@ -685,12 +670,209 @@ def viewassignment():
             user_name = user['name']
 
             # Retrieve the user's assignments from the database
-            cursor.execute('SELECT * FROM topics WHERE created_by = ?', (user_name,))
+            # cursor.execute('SELECT * FROM topics WHERE created_by = ?', (user_name,))
+            cursor.execute('SELECT * FROM topics WHERE created_by = ? order by id desc', (user_name,))
             topics = cursor.fetchall()
             
             return render_template('viewAssignment.html', topics=topics)
 
     return redirect(url_for('home'))
+
+
+
+
+@app.route('/studentDashboard')
+def student_dashboard():
+    if 'email' in session:
+        email = session['email']
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT id, name, Student_course FROM users WHERE email = ?', (email,))
+        student = cursor.fetchone()
+        if student:
+            # Retrieve the assignments assigned to the student's course
+            # cursor.execute('SELECT id, heading, description, created_by FROM topics WHERE assigned_group = ?', (student['Student_course'],))
+            cursor.execute('SELECT id, heading, description, created_by FROM topics WHERE assigned_group = ? order by id desc', (student['Student_course'],))
+            assignments = cursor.fetchall()
+             # Render the student dashboard template and pass the assignments
+            return render_template('studentDashboard.html', assignments=assignments)
+        # return render_template('studentDashboard.html')
+        error = 'Student information not found. Please try again.'
+        return render_template('login.html', error=error)
+    else:
+        return redirect(url_for('home'))
+
+
+
+def create_tables3():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS submissions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            assignment_id INTEGER,
+            student_id TEXT,
+            file_name TEXT,
+            file_path TEXT,
+            submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (assignment_id) REFERENCES topics(id),
+            FOREIGN KEY (student_id) REFERENCES users(id)
+        )
+    ''')
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+create_tables3()
+
+
+
+
+@app.route('/submitassignment/<int:assignment_id>', methods=['GET', 'POST'])
+def submit_assignment(assignment_id):
+    if request.method == 'POST':
+        # Handle file submission logic here
+        file = request.files['file']
+
+        email = session['email']
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT id, name, Student_course FROM users WHERE email = ?', (email,))
+        student_data = cursor.fetchone()
+        student_id = student_data[0]
+        student_name = student_data[1]
+        Student_course = student_data[2]
+
+        conn.close()
+        
+        
+
+        # Generate a unique file name
+        file_name = secure_filename(file.filename)
+        # Example: assignment1_student1.pdf
+        unique_file_name = f"assignment_{assignment_id}_{Student_course}_{student_id}_{student_name}_{file_name}"
+
+        # Save the file to the appropriate folder
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_file_name)
+        file.save(file_path)
+
+        # Store the submission details in the database
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO submissions (assignment_id, student_id, file_name, file_path)
+            VALUES (?, ?, ?, ?)
+        ''', (assignment_id, student_id, unique_file_name, file_path))
+        conn.commit()
+        conn.close()
+
+        flash('Assignment submitted successfully!', 'success')
+        return redirect(url_for('student_dashboard'))
+
+    # Retrieve the assignment details from the database based on the assignment_id
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM topics WHERE id = ?', (assignment_id,))
+    assignment = cursor.fetchone()
+    conn.close()
+
+    return render_template('submitassignment.html', assignment=assignment, assignment_id=assignment_id)
+
+
+
+@app.route('/view_uploads')
+def view_uploads():
+    email = session['email']
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Retrieve the student's submitted assignments and their corresponding file details
+    cursor.execute('''
+        SELECT t.id, t.heading, t.description, s.file_name, t.created_by
+        FROM topics t
+        INNER JOIN submissions s ON t.id = s.assignment_id
+        WHERE s.student_id = (SELECT id FROM users WHERE email = ?) order by t.id desc
+    ''', (email,))
+    assignments = cursor.fetchall()
+
+    conn.close()
+
+    return render_template('view_uploads.html', assignments=assignments)
+
+
+@app.route('/download_file/<string:file_name>')
+def download_file(file_name):
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], file_name)
+    return send_file(file_path, as_attachment=True)
+
+
+@app.route('/assignmentdetails/<int:assignment_id>')
+def assignment_details(assignment_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Retrieve the assignment details
+    cursor.execute('SELECT * FROM topics WHERE id = ?', (assignment_id,))
+    assignment = cursor.fetchone()
+
+    # Retrieve the submissions for the assignment
+    cursor.execute('SELECT * FROM submissions WHERE assignment_id = ?', (assignment_id,))
+    submissions = cursor.fetchall()
+
+    # Retrieve the assigned group for the assignment
+    assigned_group = assignment[4]
+
+    # Retrieve the students belonging to the assigned group who have not submitted the assignment
+    cursor.execute('SELECT * FROM users WHERE user_type = "Student" AND Student_course = ? AND id NOT IN (SELECT student_id FROM submissions WHERE assignment_id = ?)', (assigned_group, assignment_id))
+    students_not_submitted = cursor.fetchall()
+
+    cursor.execute('SELECT * FROM users WHERE user_type = "Student" AND Student_course = ? AND id IN (SELECT student_id FROM submissions WHERE assignment_id = ?)', (assigned_group, assignment_id))
+    students_submitted = cursor.fetchall()
+
+    
+    conn.close()
+
+    return render_template('assignmentdetails.html', assignment=assignment, submissions=submissions, students_not_submitted=students_not_submitted,students_submitted=students_submitted)
+
+
+@app.route('/delete_assignment/<int:assignment_id>', methods=['POST'])
+def delete_assignment(assignment_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Delete the assignment from the topics table
+    cursor.execute('DELETE FROM topics WHERE id = ?', (assignment_id,))
+    conn.commit()
+    conn.close()
+
+    # Redirect to a success page or any other desired action
+    return redirect(url_for('viewassignment'))
+
+
+
+@app.route('/download_submission/<int:submission_id>')
+def download_submission(submission_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Retrieve the submission details
+    cursor.execute('SELECT * FROM submissions WHERE id = ?', (submission_id,))
+    submission = cursor.fetchone()
+
+    # Check if the submission exists
+    if submission:
+        file_path = submission[4]  # Assuming the file path is stored in the 4th column
+        return send_file(file_path, as_attachment=True)
+    
+    conn.close()
+    return "Submission not found."
+
+# Update the template code in assignment_details.html
+
+
+
+
 
 
 
