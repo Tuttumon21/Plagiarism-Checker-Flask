@@ -1,1 +1,0 @@
-Python is a very popular general-purpose interpreted, interactive, object-oriented, and high-level programming language. When we are developing this tutorial in 2022, there is a high shortage of Python Programmers where as market demands more number of Python Programmers due to it's application in Machine Learning, Artificial Intelligence etc.
