@@ -32,14 +32,24 @@
           <div class="form-group">
             <div class="justify-center mx-auto max-w-lg mt-5">
                 <input name="heading" type="text" placeholder="Topic Heading" class="mb-5 input input-bordered input-primary" style="width: 500px;" required/>
-              <textarea  name="description" class="textarea textarea-primary" rows="8" id="exampleFormControlTextarea1" placeholder="Topic Description..."style="width: 500px;" required></textarea>
+              <textarea  name="description" class="mb-5 textarea textarea-primary" rows="8" id="exampleFormControlTextarea1" placeholder="Topic Description..."style="width: 500px;" required></textarea>
+              <select name="assigned_group" class="select select-primary w-full border-gray-200" style="width: 500px;" required>
+                <option disabled selected>Student Course</option>
+                <option>BCA</option>
+                <option>BSc Computer Science</option>
+                <option>BSc Electronics</option>
+                <option>BSc Cyber Forensic</option>
+                <option>MCA</option>
+                <option>MSc Applied Electronics</option>
+                <option>MSc Computer Science</option>
+                <option>MSc Cyber Forensic</option>
+              </select>
             </div>
           </div>
+
         <div style="text-align: center;">
         <div class="justify-center mx-auto max-w-lg m-5">
-          
           <button type="submit" class="btn btn-outline btn-info" style="border-radius: 15px; height: 45px;">ADD ASSIGNMENT</button>
-          
         </div>
     
     </div>
