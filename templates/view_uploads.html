@@ -1,0 +1,116 @@
+
+
+
+<link
+      href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.0.2/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com%22%3E/"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@3.1.7/dist/full.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+
+{% include 'studnavbar.html' %}
+
+
+{% if assignments %}
+<div class="overflow-x-auto mt-10 w-full">
+    <div class="flex items-center justify-center">
+        <div class="text-center">
+    <table
+      class="divide-y-2 divide-gray-200 border-2 text-sm dark:divide-gray-700 dark:bg-gray-900"
+    >
+      <thead class="ltr:text-left rtl:text-right">
+        <tr>
+            <th
+            class="whitespace-nowrap px-4 py-2 font-medium text-white"
+          >
+          Assignment ID
+          </th>
+          
+          <th
+            class="whitespace-nowrap px-4 py-2 font-medium text-white"
+          >
+          Creator
+          </th>
+          <th
+            class="whitespace-nowrap px-4 py-2 font-medium text-white"
+          >
+          Heading
+          </th>
+          <th
+            class="whitespace-nowrap px-4 py-2 font-medium text-white"
+          >
+          Description
+          </th>
+          
+          <th
+            class="whitespace-nowrap px-4 py-2 font-medium text-white"
+          >
+          Filename
+          </th>
+          <th
+            class="whitespace-nowrap px-4 py-2 font-medium text-white"
+          >
+          Download
+          </th>
+          <th class="px-4 py-2"></th>
+        </tr>
+      </thead>
+  
+      {% for assignment in assignments %}
+      <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+        <tr>
+          <td
+            class="whitespace-nowrap px-4 py-2 font-medium text-white"
+          >
+          {{ assignment[0] }}
+          </td>
+          <td
+            class="whitespace-nowrap px-4 py-2 text-white"
+          >
+          {{ assignment[4] }}
+          </td>
+          <td
+            class="whitespace-nowrap px-4 py-2 text-white"
+          >
+          {{ assignment[1] }}
+          </td>
+          <td
+            class="whitespace-nowrap px-4 py-2 text-white"
+          >
+          {{ assignment[2] }}
+          </td>
+          <td
+            class="whitespace-nowrap px-4 py-2 text-white"
+          >
+          {{ assignment[3] }}
+          </td>
+
+          <td class="whitespace-nowrap px-4 py-2">
+            <a href="{{ url_for('download_file', file_name=assignment[3]) }}"
+   target="_blank"
+   class="inline-block rounded bg-indigo-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-700"
+>
+  View
+</a>
+
+          </td>
+        </tr>
+      </tbody>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+</div>
+{% else %}  
+<div class="flex items-center justify-center h-96">
+    <div class="mx-auto max-w-lg text-center">
+      <h2 class="text-3xl font-bold sm:text-4xl">NO Uploaded Files Found.</h2>
+    </div>
+  </div>
+  {% endif %}
+ 

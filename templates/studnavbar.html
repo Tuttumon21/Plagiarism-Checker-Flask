@@ -1,0 +1,15 @@
+<div class="navbar bg-base-100 shadow-md">
+    <div class="navbar-start">
+      <a class="btn btn-ghost normal-case text-xl">STUDENTS DASHBOARD</a>
+    </div>
+    <!-- <div class="tabs justify-center "> -->
+      <a class="tab tab-lifted btn btn-outline btn-warning mx-1" href="{{ url_for('student_dashboard')}}">Dashboard</a> 
+      <a class="tab tab-lifted btn btn-outline btn-warning mx-1" href="{{ url_for('view_uploads') }}">View Uploads</a>
+      <!-- <a class="tab tab-lifted btn btn-outline btn-warning mx-1" href="{{ url_for('document')}}">Grammer Checker</a> -->
+    <!-- </div> -->
+    <div class="navbar-end">
+      <form action="{{ url_for('logout') }}" method="POST">
+        <button type="submit" class="btn btn-error">Logout</button>
+      </form>
+    </div>
+  </div>

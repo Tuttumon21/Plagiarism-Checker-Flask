@@ -1,0 +1,61 @@
+<script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.0.2/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com%22%3E/"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@3.1.7/dist/full.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+
+
+{% include 'studnavbar.html' %}
+
+
+
+<section class="rounded-xl p-4 ring ring-indigo-50 sm:p-6 lg:p-8 mx-auto max-w-lg mt-10">
+    <div class="flex items-start sm:gap-8">
+      <div>
+        <strong
+          class="rounded border border-indigo-500 bg-indigo-500 px-3 py-1.5 font-medium text-white"
+        >
+        Assignment No. {{ assignment['id'] }}
+        </strong>
+  
+        <h1 class="mt-4 text-lg text-white font-medium sm:text-xl">
+          {{ assignment['heading'] }}
+        </h1>
+  
+        <p class="mt-1 text-sm text-white">
+            {{ assignment['description'] }}
+        </p>
+  
+        <div class="mt-4 sm:flex sm:items-center sm:gap-2">
+          <div class="flex items-center gap-1 text-gray-500"> 
+            <p class="text-xs font-medium">By {{ assignment['created_by'] }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <form action="{{ url_for('submit_assignment', assignment_id=assignment_id) }}" method=post enctype=multipart/form-data>
+    <div style="text-align: center;">
+      <div class="justify-center mx-auto max-w-lg">
+          <input name="file" type="file" id="formFileLg" class="file-input file-input-bordered file-input-primary" style="border-radius: 10px; width: 270px; margin-top: 20px; margin-bottom: 20px;"/>
+      </div>
+  </div>
+  <div style="text-align: center;">
+  <div class="justify-center mx-auto max-w-lg">
+    
+    <button type="submit" class="btn btn-outline btn-info" style="border-radius: 15px; height: 45px;">Submit</button>
+    
+  </div>
+</div>
+</form>
+
+

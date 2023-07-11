@@ -1,0 +1,143 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assignment Details</title>
+  <link
+  href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.0.2/tailwind.min.css"
+  rel="stylesheet"
+/>
+<script src="https://cdn.tailwindcss.com%22%3E/"></script>
+<link
+  href="https://cdn.jsdelivr.net/npm/daisyui@3.1.7/dist/full.css"
+  rel="stylesheet"
+  type="text/css"
+/>
+<script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+<body>
+  {% include 'navbar.html' %}
+
+  {% block content %}
+  
+  
+  <div class="mx-auto max-w-lg text-center px-4 py-8 sm:py-12 sm:px-6 lg:py-16 lg:px-8">
+    <h2 class="text-3xl font-bold sm:text-4xl ">Submissions</h2>
+  </div>
+  
+    {% if submissions %}
+    <div class="overflow-x-auto w-full">
+      <div class="flex items-center justify-center">
+          <div class="text-center">
+              <table class="divide-y-2 divide-gray-200 border-2 text-sm dark:divide-gray-700 dark:bg-gray-900">
+                  <thead class="ltr:text-left rtl:text-right">
+                      <tr>
+                          <th class="whitespace-nowrap px-4 py-2 font-medium text-white">
+                              Assignment ID
+                          </th>
+                          <th class="whitespace-nowrap px-4 py-2 font-medium text-white">
+                              Heading
+                          </th>
+                          <th class="whitespace-nowrap px-4 py-2 font-medium text-white">
+                              Student ID
+                          </th>
+                          
+                          <th class="whitespace-nowrap px-4 py-2 font-medium text-white">
+                              Filename
+                          </th>
+                          <th class="whitespace-nowrap px-4 py-2 font-medium text-white">
+                              Submitted At
+                          </th>
+                          <th class="whitespace-nowrap px-4 py-2 font-medium text-white">
+                              Download
+                          </th>
+                          <th class="px-4 py-2"></th>
+                      </tr>
+                  </thead>
+  
+                  <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                      {% for submission in submissions %}
+                        
+                          <tr>
+                              <td class="whitespace-nowrap px-4 py-2 font-medium text-white">
+                                  {{ assignment[0] }}
+                              </td>
+                              <td class="whitespace-nowrap px-4 py-2 text-white">
+                                  {{ assignment[1] }}
+                              </td>
+                              <td class="whitespace-nowrap px-4 py-2 text-white">
+                                  {{ submission[2] }}
+                              </td>
+                              
+                              <td class="whitespace-nowrap px-4 py-2 text-white">
+                                  {{ submission[3] }}
+                              </td>
+                              <td class="whitespace-nowrap px-4 py-2 text-white">
+                                  {{ submission[5] }}
+                              </td>
+                              <td class="whitespace-nowrap px-4 py-2">
+                                  <a href="{{ url_for('download_submission', submission_id=submission[0]) }}"
+                                  target="_blank"
+     class="inline-block rounded bg-indigo-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-700">Download</a>
+                              </td>
+                          </tr>
+                          
+                      {% endfor %}
+                  </tbody>
+              </table>
+          </div>
+      </div>
+  </div>
+  
+  {% endif %}
+  
+  <div class="flex w-full my-10 px-56">
+    {% if students_submitted %}
+    <div class="grid h-auto flex-grow card bg-base-300 rounded-box place-items-center text-white font-bold border-2">
+      <h3>Students who did  submit</h3>
+      <div class="mt-2">
+        
+        {% for student in students_submitted %}
+        <p>{{ loop.index }}. {{ student.name }}</p>
+        {% endfor %}
+
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="divider divider-horizontal"></div>
+
+    {% if students_not_submitted %}
+    <div class="grid h-auto flex-grow card bg-base-300 rounded-box place-items-center text-white font-bold border-2">
+      <h3>Students who did  submit</h3>
+      <div class="mt-2">
+        
+        {% for student in students_not_submitted %}
+        <p>{{ loop.index }}. {{ student.name }}</p>
+        {% endfor %}
+
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+    <div style="text-align: center;">
+    <div class="justify-center mx-auto max-w-lg mt-10">
+      <form method="POST" action="{{ url_for('delete_assignment', assignment_id=assignment[0]) }}">
+        <button type="submit" class="btn btn-outline btn-error" style="border-radius: 15px; height: 45px;">DELETE ASSIGNMENT</button>
+      </form>
+    </div>
+  </div>
+
+
+
+
+  {% endblock %} 
+</body>
+</html>
+
+
+
+  
+
