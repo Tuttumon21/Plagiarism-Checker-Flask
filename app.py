@@ -703,7 +703,6 @@ def student_dashboard():
         return redirect(url_for('home'))
 
 
-
 def create_tables3():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -715,8 +714,9 @@ def create_tables3():
             file_name TEXT,
             file_path TEXT,
             submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (assignment_id) REFERENCES topics(id),
-            FOREIGN KEY (student_id) REFERENCES users(id)
+            FOREIGN KEY (assignment_id) REFERENCES topics (id),
+            FOREIGN KEY (student_id) REFERENCES users (id),
+            UNIQUE (assignment_id, student_id)
         )
     ''')
     conn.commit()
@@ -724,9 +724,7 @@ def create_tables3():
     conn.close()
 
 create_tables3()
-
-
-
+from datetime import datetime
 
 @app.route('/submitassignment/<int:assignment_id>', methods=['GET', 'POST'])
 def submit_assignment(assignment_id):
@@ -742,28 +740,46 @@ def submit_assignment(assignment_id):
         student_data = cursor.fetchone()
         student_id = student_data[0]
         student_name = student_data[1]
-        Student_course = student_data[2]
+        student_course = student_data[2]
 
         conn.close()
         
-        
-
         # Generate a unique file name
         file_name = secure_filename(file.filename)
         # Example: assignment1_student1.pdf
-        unique_file_name = f"assignment_{assignment_id}_{Student_course}_{student_id}_{student_name}_{file_name}"
+        unique_file_name = f"assignment_{assignment_id}_student_{student_id}_{student_name}_{file_name}"
 
         # Save the file to the appropriate folder
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_file_name)
         file.save(file_path)
 
-        # Store the submission details in the database
+        # Get the current timestamp
+        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        # Check if the student has already submitted a file for this assignment
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('''
-            INSERT INTO submissions (assignment_id, student_id, file_name, file_path)
-            VALUES (?, ?, ?, ?)
-        ''', (assignment_id, student_id, unique_file_name, file_path))
+        cursor.execute('SELECT * FROM submissions WHERE assignment_id = ? AND student_id = ?', (assignment_id, student_id))
+        existing_submission = cursor.fetchone()
+
+        if existing_submission:
+            # If an existing submission exists, delete the previous file
+            previous_file_path = existing_submission['file_path']
+            os.remove(previous_file_path)
+
+            # Update the existing submission with the new file details and current timestamp
+            cursor.execute('''
+                UPDATE submissions
+                SET file_name = ?, file_path = ?, submitted_at = ?
+                WHERE id = ?
+            ''', (unique_file_name, file_path, current_time, existing_submission['id']))
+        else:
+            # If there is no existing submission, insert a new submission with the current timestamp
+            cursor.execute('''
+                INSERT INTO submissions (assignment_id, student_id, file_name, file_path, submitted_at)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (assignment_id, student_id, unique_file_name, file_path, current_time))
+
         conn.commit()
         conn.close()
 
