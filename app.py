@@ -747,7 +747,7 @@ def submit_assignment(assignment_id):
         # Generate a unique file name
         file_name = secure_filename(file.filename)
         # Example: assignment1_student1.pdf
-        unique_file_name = f"assignment_{assignment_id}_student_{student_id}_{student_name}_{file_name}"
+        unique_file_name = f"assignment_{assignment_id}_{student_course}_student_{student_id}_{student_name}_{file_name}"
 
         # Save the file to the appropriate folder
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_file_name)
